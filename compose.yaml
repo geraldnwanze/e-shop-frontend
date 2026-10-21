@@ -1,0 +1,26 @@
+# Self-hosted web (storefronts + dashboard + platform console) on a VPS.
+#
+#   cp .env.example .env     # set API_URL, PLATFORM_DOMAIN, STOREFRONT_SCHEME=https
+#   docker compose up -d --build
+#
+# Point wildcard DNS (*.mydomain.com), app.mydomain.com and your custom-domain CNAME target at this host
+# (behind TLS: Cloudflare proxy, Caddy, or similar). It is a single container: Host-header based tenant routing
+# happens inside Next.js (proxy.ts), so one instance serves every store.
+
+name: shop-web
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        IMAGE_HOSTS: ${IMAGE_HOSTS:-}
+    image: ${WEB_IMAGE:-shop-web:latest}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      API_URL: ${API_URL:?set API_URL in .env}
+      PLATFORM_DOMAIN: ${PLATFORM_DOMAIN:?set PLATFORM_DOMAIN in .env}
+      STOREFRONT_SCHEME: ${STOREFRONT_SCHEME:-https}
+      STOREFRONT_REVALIDATE: ${STOREFRONT_REVALIDATE:-60}

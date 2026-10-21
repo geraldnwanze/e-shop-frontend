@@ -1,0 +1,18 @@
+# Local dev reverse proxy: maps ports to hostnames so no :3000 / :8000 in URLs.
+#   http://api.e-shop.test        -> Laravel API (127.0.0.1:8000)
+#   http://e-shop.test            -> landing page (Next.js, 127.0.0.1:3000)
+#   http://app.e-shop.test        -> merchant dashboard
+#   http://{store}.e-shop.test    -> storefronts
+# Requires *.test to resolve to 127.0.0.1 (dnsmasq + /etc/resolver/test, see README/notes).
+# Run: caddy run --config Caddyfile.dev --adapter caddyfile
+{
+	auto_https off
+}
+
+http://api.e-shop.test {
+	reverse_proxy 127.0.0.1:8000
+}
+
+http://e-shop.test, http://*.e-shop.test {
+	reverse_proxy 127.0.0.1:3000
+}

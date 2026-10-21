@@ -1,26 +1,300 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Tailwind v4 resets buttons to the default cursor; every clickable control should show a pointer. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  a[href],
+  summary,
+  select:not(:disabled),
+  label[for],
+  input:is([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="file"]):not(:disabled) {
+    cursor: pointer;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Store theming: every colour/font comes from the store's configuration (API),
+   injected as --sf-* variables by <StoreShell>. Nothing is hard-coded per merchant. */
+@theme inline {
+  --color-primary: var(--sf-primary, #111827);
+  --color-primary-fg: var(--sf-primary-fg, #ffffff);
+  --color-secondary: var(--sf-secondary, #6b7280);
+  --color-accent: var(--sf-accent, #f59e0b);
+  --color-accent-fg: var(--sf-accent-fg, #000000);
+  --color-surface: var(--sf-background, #ffffff);
+  --color-foreground: var(--sf-text, #111827);
+  --font-heading: var(--sf-font-heading, ui-sans-serif), system-ui, sans-serif;
+  --font-body: var(--sf-font-body, ui-sans-serif), system-ui, sans-serif;
 }
+
+/* Defaults so shared components render sensibly outside a themed storefront (e.g. the dashboard). */
+:root {
+  --sf-radius: 0.375rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--sf-background, #ffffff);
+  color: var(--sf-text, #111827);
+  font-family: var(--sf-font-body, ui-sans-serif), system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Marketing site (the landing page at the bare platform domain).
+ * Scoped under .mk so it never touches storefront/dashboard styling.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  --color-mk-bg: var(--mk-bg);
+  --color-mk-surface: var(--mk-surface);
+  --color-mk-raised: var(--mk-raised);
+  --color-mk-fg: var(--mk-fg);
+  --color-mk-muted: var(--mk-muted);
+  --color-mk-border: var(--mk-border);
+  --color-mk-brand: var(--mk-brand);
+  --color-mk-brand-fg: #ffffff;
+  --color-mk-accent: var(--mk-accent);
+  --color-mk-good: var(--mk-good);
+  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.mk {
+  --mk-bg: #fbfaff;
+  --mk-surface: #f3f1ff;
+  --mk-raised: #ffffff;
+  --mk-fg: #0e0a2b;
+  --mk-muted: #57526f;
+  --mk-border: rgb(30 20 100 / 0.12);
+  --mk-brand: #5b3df5;
+  --mk-accent: #d6249f;
+  --mk-good: #0f9d6b;
+  --mk-glow-a: rgb(110 80 255 / 0.28);
+  --mk-glow-b: rgb(236 72 180 / 0.2);
+  --mk-glow-c: rgb(34 211 238 / 0.18);
+
+  background: var(--mk-bg);
+  color: var(--mk-fg);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mk {
+    --mk-bg: #07061a;
+    --mk-surface: #0d0b27;
+    --mk-raised: #141133;
+    --mk-fg: #f4f2ff;
+    --mk-muted: #a9a4c9;
+    --mk-border: rgb(190 180 255 / 0.14);
+    --mk-brand: #8b7bff;
+    --mk-accent: #ff5fc4;
+    --mk-good: #34d399;
+    --mk-glow-a: rgb(110 80 255 / 0.4);
+    --mk-glow-b: rgb(236 72 180 / 0.26);
+    --mk-glow-c: rgb(34 211 238 / 0.2);
+  }
+}
+
+.mk ::selection {
+  background: var(--mk-brand);
+  color: #fff;
+}
+
+/* Soft aurora behind the hero */
+.mk-aurora {
+  background:
+    radial-gradient(60rem 30rem at 15% -10%, var(--mk-glow-a), transparent 60%),
+    radial-gradient(50rem 28rem at 90% 0%, var(--mk-glow-b), transparent 60%),
+    radial-gradient(45rem 25rem at 50% 40%, var(--mk-glow-c), transparent 65%);
+}
+
+/* Fine grid that fades out */
+.mk-grid {
+  background-image:
+    linear-gradient(to right, var(--mk-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--mk-border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+
+.mk-gradient-text {
+  background: linear-gradient(100deg, var(--mk-brand) 0%, var(--mk-accent) 55%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mk-card {
+  background: var(--mk-raised);
+  border: 1px solid var(--mk-border);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 40px -18px rgb(20 10 90 / 0.25);
+}
+
+.mk-btn-primary {
+  background: linear-gradient(135deg, var(--mk-brand), var(--mk-accent));
+  color: #fff;
+  box-shadow: 0 10px 30px -10px var(--mk-brand);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.mk-btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 16px 36px -12px var(--mk-brand);
+}
+
+@keyframes mk-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes mk-draw {
+  from { stroke-dashoffset: 600; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes mk-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes mk-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+.mk-float { animation: mk-float 7s ease-in-out infinite; }
+.mk-float-slow { animation: mk-float 9s ease-in-out -3s infinite; }
+.mk-draw { stroke-dasharray: 600; animation: mk-draw 2.2s 0.4s ease-out both; }
+.mk-marquee { animation: mk-marquee 38s linear infinite; }
+.mk-marquee:hover { animation-play-state: paused; }
+.mk-hero-in { animation: mk-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Scroll-driven reveal where supported; content is simply visible everywhere else. */
+@supports (animation-timeline: view()) {
+  .mk-reveal {
+    animation: mk-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 28%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-float, .mk-float-slow, .mk-draw, .mk-marquee, .mk-hero-in, .mk-reveal {
+    animation: none !important;
+  }
+  .mk-draw { stroke-dasharray: none; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Merchant dashboard, platform console and auth screens.
+ * Scoped under .bo so storefront themes and the marketing site are untouched.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  --color-brand: #5b3df5;
+  --color-brand-ink: #3a22c4;
+  --color-brand-soft: #efecff;
+  --color-ink: #14102e;
+  --color-sidebar: #0d0926;
+}
+
+.bo {
+  --sf-primary: #5b3df5;
+  --sf-primary-fg: #ffffff;
+  --sf-text: #14102e;
+  --sf-radius: 0.65rem;
+
+  background:
+    radial-gradient(60rem 28rem at 8% -12%, rgb(110 80 255 / 0.1), transparent 60%),
+    radial-gradient(48rem 24rem at 100% 0%, rgb(236 72 180 / 0.07), transparent 60%),
+    #f6f5fb;
+  color: #14102e;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bo ::selection {
+  background: #5b3df5;
+  color: #fff;
+}
+
+/* Primary buttons (the shared <Button>) get the brand gradient inside the app. */
+.bo button.bg-primary,
+.bo a.bg-primary {
+  background-image: linear-gradient(135deg, #5b3df5 0%, #8344ee 55%, #c42a9f 100%);
+  box-shadow: 0 8px 20px -10px rgb(91 61 245 / 0.7);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.bo button.bg-primary:hover:not(:disabled),
+.bo a.bg-primary:hover {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+.bo tbody tr:hover td {
+  background: #faf9ff;
+}
+
+.bo-sidebar {
+  background:
+    radial-gradient(22rem 14rem at 0% 0%, rgb(110 80 255 / 0.35), transparent 70%),
+    radial-gradient(18rem 14rem at 100% 100%, rgb(236 72 180 / 0.16), transparent 70%),
+    #0d0926;
+}
+
+@keyframes bo-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.bo-enter { animation: bo-fade-up 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bo-enter { animation: none; }
+  .bo button.bg-primary, .bo a.bg-primary { transition: none; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Storefront inner pages (list, product, cart, checkout, account...).
+ * Components carry semantic sf-* classes; each theme shapes them here, so
+ * client and server components pick up the theme without being passed it.
+ * Unlayered on purpose: it must win over the default utility classes.
+ * ------------------------------------------------------------------ */
+[data-theme="fashion"] .sf-banner { background: transparent; border-bottom-color: rgb(0 0 0 / 0.15); text-align: center; }
+[data-theme="fashion"] .sf-banner-crumbs { justify-content: center; text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.7rem; }
+[data-theme="fashion"] .sf-banner-title { text-transform: uppercase; letter-spacing: 0.25em; font-weight: 500; font-size: clamp(1.6rem, 4vw, 2.5rem); }
+[data-theme="fashion"] .sf-panel { box-shadow: none; border: 1px solid rgb(0 0 0 / 0.15); border-radius: 0; }
+[data-theme="fashion"] .sf-panel-title { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8rem; font-weight: 600; }
+[data-theme="fashion"] .sf-step { background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 0; }
+[data-theme="fashion"] .sf-input { border-radius: 0; border-width: 0 0 1px 0; background: transparent; padding-left: 0; }
+[data-theme="fashion"] .sf-input:focus { box-shadow: none; background: transparent; }
+
+[data-theme="modern"] .sf-banner { background: var(--sf-primary); color: var(--sf-primary-fg); border-bottom: 2px solid var(--sf-text); }
+[data-theme="modern"] .sf-banner-title { font-size: clamp(2.25rem, 6vw, 3.75rem); line-height: 1; }
+[data-theme="modern"] .sf-panel { box-shadow: 4px 4px 0 0 var(--sf-text); border: 2px solid var(--sf-text); }
+[data-theme="modern"] .sf-input { border-width: 2px; border-color: var(--sf-text); }
+
+[data-theme="electronics"] .sf-banner { background: var(--sf-primary); color: var(--sf-primary-fg); border-bottom: 3px solid var(--sf-accent); }
+[data-theme="electronics"] .sf-panel { border-radius: 2px; border-top: 3px solid var(--sf-accent); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
+[data-theme="electronics"] .sf-step { border-radius: 2px; background: var(--sf-accent); color: var(--sf-accent-fg); }
+[data-theme="electronics"] .sf-input { border-radius: 2px; }
+
+[data-theme="beauty"] .sf-banner { background: linear-gradient(135deg, color-mix(in srgb, var(--sf-accent) 28%, transparent), color-mix(in srgb, var(--sf-primary) 6%, transparent)); text-align: center; border-bottom: 0; }
+[data-theme="beauty"] .sf-banner-crumbs { justify-content: center; }
+[data-theme="beauty"] .sf-banner-title { font-weight: 500; letter-spacing: 0; }
+[data-theme="beauty"] .sf-panel { border-radius: 1.75rem; box-shadow: 0 14px 40px -14px color-mix(in srgb, var(--sf-primary) 30%, transparent); }
+
+[data-theme="restaurant"] .sf-banner { background: transparent; text-align: center; border-bottom: 3px double rgb(0 0 0 / 0.25); }
+[data-theme="restaurant"] .sf-banner-crumbs { justify-content: center; }
+[data-theme="restaurant"] .sf-banner-title::after { content: "❖"; display: block; margin-top: 0.5rem; font-size: 0.9rem; color: var(--sf-accent); }
+[data-theme="restaurant"] .sf-panel { box-shadow: inset 0 0 0 4px var(--sf-background, #fff), inset 0 0 0 5px rgb(0 0 0 / 0.18); border: 1px solid rgb(0 0 0 / 0.2); }
+[data-theme="restaurant"] .sf-step { border-radius: 2px; }
